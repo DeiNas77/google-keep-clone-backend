@@ -8,6 +8,7 @@ export class UserEntity extends CoreEntity {
     type: "varchar",
     length: 100,
     unique: true,
+    nullable: false,
   })
   email!: string;
 
@@ -15,6 +16,7 @@ export class UserEntity extends CoreEntity {
     type: "varchar",
     length: 255,
     name: "password_hash",
+    nullable: false,
   })
   passwordHash!: string;
 
