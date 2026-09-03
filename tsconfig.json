@@ -8,8 +8,8 @@
     // Environment
     "target": "es2022",
     "lib": ["es2022"],
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "types": ["node"],
 
     // Strictness
@@ -32,3 +32,4 @@
   },
   "include": ["src"]
 }
+
