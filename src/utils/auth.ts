@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { JWT_WEB_TOKEN, JWT_EXPIRES } from "../constants.js";
-import type { SignOptions } from "jsonwebtoken";
+import type { JwtPayload, SignOptions } from "jsonwebtoken";
 
 export const hashPassword = async (password: string): Promise<string> => {
   return await bcrypt.hash(password, 10);
@@ -22,4 +22,11 @@ export const createToken = (payload: { id: string; email: string }) => {
   return jwt.sign(payload, JWT_WEB_TOKEN, {
     expiresIn: JWT_EXPIRES as SignOptions["expiresIn"],
   });
+};
+
+export const verifyToken = (token: string) => {
+  if (!token || !JWT_WEB_TOKEN)
+    throw new Error("Las variables del token no coinciden");
+  const payload = jwt.verify(token, JWT_WEB_TOKEN) as JwtPayload;
+  return payload;
 };
