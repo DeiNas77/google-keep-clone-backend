@@ -40,3 +40,16 @@ export const createNoteController = async (req: Request, res: Response) => {
   }
 };
 
+export const getNoteController = async (req: Request, res: Response) => {
+  const userId = (req as AuthRequest).user?.id;
+  try {
+    if (!userId) {
+      return res.status(401).json({ message: "No autorizado" });
+    }
+    const notes = await noteRepository.findBy({ userId });
+
+    return res.status(200).json({ notes });
+  } catch (error) {
+    return res.status(500).json({ message: "Error interno del servidor" });
+  }
+};
