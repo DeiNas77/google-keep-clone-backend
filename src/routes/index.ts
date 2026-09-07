@@ -8,8 +8,8 @@ import { notesRoutes } from "./noteRoutes.js";
 export const routes = (app: Express): Express => {
   const router = Router();
 
-  return app.use(
-    "/api/v1.0",
-    router.use("/auth", authRoutes(), router.use("/", notesRoutes())),
-  );
+  router.use("/auth", authRoutes());
+  router.use("/notes", notesRoutes());
+
+  return app.use("/api/v1.0", router);
 };

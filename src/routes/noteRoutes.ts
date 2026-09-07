@@ -1,9 +1,15 @@
 import { Router } from "express";
+
+/* Middlewares */
+import { verifyTokenMiddleware } from "../middlewares/authMiddleware.js";
+
+/* Controllers */
 import {
   createNoteController,
+  deleteNoteController,
   getNoteController,
+  updateNoteController,
 } from "../controllers/noteController.js";
-import { verifyTokenMiddleware } from "../middlewares/authMiddleware.js";
 
 export const notesRoutes = () => {
   const routerRoot = Router();
@@ -11,6 +17,11 @@ export const notesRoutes = () => {
     .route("/")
     .get([verifyTokenMiddleware], getNoteController)
     .post([verifyTokenMiddleware], createNoteController);
+
+  routerRoot
+    .route("/:id")
+    .patch([verifyTokenMiddleware], updateNoteController)
+    .delete([verifyTokenMiddleware], deleteNoteController);
 
   return routerRoot;
 };
