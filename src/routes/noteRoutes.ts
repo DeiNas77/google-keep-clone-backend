@@ -8,6 +8,7 @@ import {
   createNoteController,
   deleteNoteController,
   getNoteController,
+  getStatsController,
   updateNoteController,
 } from "../controllers/noteController.js";
 
@@ -17,6 +18,9 @@ export const notesRoutes = () => {
     .route("/")
     .get([verifyTokenMiddleware], getNoteController)
     .post([verifyTokenMiddleware], createNoteController);
+
+  // OJO: /stats SIEMPRE antes de /:id — si no, Express toma "stats" como un :id
+  routerRoot.route("/stats").get([verifyTokenMiddleware], getStatsController);
 
   routerRoot
     .route("/:id")

@@ -54,6 +54,23 @@ export const getNoteController = async (req: Request, res: Response) => {
   }
 };
 
+export const getStatsController = async (req: Request, res: Response) => {
+  const userId = (req as AuthRequest).user?.id;
+  try {
+    if (!userId) return res.status(401).json({ message: "No autorizado" });
+
+    const [total, archived, trashed] = await Promise.all([
+      noteRepository.countBy({ userId }),
+      noteRepository.countBy({ userId, archived: true }),
+      noteRepository.countBy({ userId, trashed: true }),
+    ]);
+
+    return res.status(200).json({ total, archived, trashed });
+  } catch (error) {
+    return res.status(500).json({ message: "Error interno del servidor" });
+  }
+};
+
 export const updateNoteController = async (req: Request, res: Response) => {
   try {
     const id = req?.params?.id;
