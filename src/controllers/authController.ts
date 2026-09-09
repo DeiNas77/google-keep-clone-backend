@@ -3,8 +3,22 @@ import { z } from "zod";
 import { GlobalRepository } from "../database/repositories/globalRepositories.js";
 import { loginSchema, registerSchema } from "../schemas/authSchema.js";
 import { comparePassword, createToken, hashPassword } from "../utils/auth.js";
+import type { AuthRequest } from "../types/AuthRequest.js";
 
 const userRepository = GlobalRepository.UserRepository;
+
+export const getMeController = async (req: Request, res: Response) => {
+  const user = (req as AuthRequest).user;
+
+  if (!user) return res.status(401).json({ message: "No autorizado" });
+
+  return res.status(200).json({
+    id: user.id,
+    email: user.email,
+    username: user.username,
+    avatarUrl: user.avatarUrl,
+  });
+};
 
 export const registerController = async (req: Request, res: Response) => {
   try {
