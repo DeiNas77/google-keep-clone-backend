@@ -12,3 +12,6 @@ export const DB = {
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
 };
+
+//MAX LIMIT FOR PAGES
+export const MAX_LIMIT = 20;

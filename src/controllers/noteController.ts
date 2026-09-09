@@ -3,6 +3,8 @@ import { z } from "zod";
 import { noteSchema, updateNoteSchema } from "../schemas/noteSchema.js";
 import { GlobalRepository } from "../database/repositories/globalRepositories.js";
 import type { AuthRequest } from "../types/AuthRequest.js";
+import { MAX_LIMIT } from "../constants.js";
+import { ILike } from "typeorm";
 
 const noteRepository = GlobalRepository.NoteRepository;
 
@@ -46,9 +48,27 @@ export const getNoteController = async (req: Request, res: Response) => {
     if (!userId) {
       return res.status(401).json({ message: "No autorizado" });
     }
-    const notes = await noteRepository.findBy({ userId });
+    const page = Math.max(Number(req.query.page ?? 1), 1);
+    const limit = Math.min(Number(req.query.limit ?? MAX_LIMIT), MAX_LIMIT);
+    const skip = (page - 1) * limit;
+    const q = typeof req.query.q === "string" ? req.query.q : undefined;
 
-    return res.status(200).json({ notes });
+    const where = q
+      ? [
+          { userId, title: ILike(`%${q}%`) },
+          { userId, content: ILike(`%${q}%`) },
+        ]
+      : { userId };
+
+    const [notes, total] = await noteRepository.findAndCount({
+      where,
+      skip,
+      take: limit,
+    });
+
+    const totalPages = Math.ceil(total / limit);
+
+    return res.status(200).json({ notes, total, page, limit, q, totalPages });
   } catch (error) {
     return res.status(500).json({ message: "Error interno del servidor" });
   }
