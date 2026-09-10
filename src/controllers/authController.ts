@@ -1,7 +1,12 @@
 import type { Request, Response } from "express";
 import { z } from "zod";
 import { GlobalRepository } from "../database/repositories/globalRepositories.js";
-import { loginSchema, registerSchema } from "../schemas/authSchema.js";
+import {
+  loginSchema,
+  registerSchema,
+  updatePasswordSchema,
+  updateProfileSchema,
+} from "../schemas/authSchema.js";
 import { comparePassword, createToken, hashPassword } from "../utils/auth.js";
 import type { AuthRequest } from "../types/AuthRequest.js";
 
@@ -94,6 +99,95 @@ export const loginController = async (req: Request, res: Response) => {
       return res
         .status(400)
         .json({ message: "Datos inválidos", errors: error.issues });
+    }
+    return res
+      .status(500)
+      .json({ message: "Error interno del servidor, intenta mas tarde" });
+  }
+};
+
+export const updateProfileController = async (req: Request, res: Response) => {
+  try {
+    const currentUser = (req as AuthRequest).user;
+    const userData = updateProfileSchema.parse(req.body);
+
+    if (userData.username) {
+      const exist = await userRepository.findOneBy({
+        username: userData.username,
+      });
+
+      if (exist && exist.id !== currentUser?.id)
+        return res
+          .status(409)
+          .json({ message: "El nombre de usuario ya existe" });
+    }
+    const updateUser = {
+      ...currentUser,
+      ...userData,
+    };
+    await userRepository.save(updateUser);
+
+    return res.status(200).json({
+      id: updateUser.id,
+      email: updateUser.email,
+      username: updateUser.username,
+      avatarUrl: updateUser.avatarUrl,
+      message: "El usuario se ha actualizado con exito",
+    });
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      return res
+        .status(400)
+        .json({ message: "Datos inválidos", errors: err.issues });
+    }
+    return res
+      .status(500)
+      .json({ message: "Error interno del servidor, intenta mas tarde" });
+  }
+};
+
+export const updatePasswordProfileController = async (
+  req: Request,
+  res: Response,
+) => {
+  try {
+    const currentUser = (req as AuthRequest).user;
+    const userData = updatePasswordSchema.parse(req.body);
+
+    if (typeof currentUser?.passwordHash !== "string")
+      return res.status(404).json({ message: "Datos inválido" });
+    const valid = await comparePassword(
+      userData.currentPassword,
+      currentUser?.passwordHash,
+    );
+
+    if (!valid)
+      return res.status(400).json({
+        message: "La contraseña actual no es correcta. No se pudo actualizar",
+      });
+
+    if (userData.currentPassword === userData.newPassword)
+      return res
+        .status(400)
+        .json({ message: "La contraseña es la misma. Elige otra" });
+
+    const newHash = await hashPassword(userData.newPassword);
+
+    const updateUser = {
+      ...currentUser,
+      passwordHash: newHash,
+    };
+
+    await userRepository.save(updateUser);
+
+    res.status(200).json({
+      message: "La contraseña se ha actualizado con exito",
+    });
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      return res
+        .status(400)
+        .json({ message: "Datos inválidos", errors: err.issues });
     }
     return res
       .status(500)
