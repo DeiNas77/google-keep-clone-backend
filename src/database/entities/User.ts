@@ -14,14 +14,19 @@ export class UserEntity extends CoreEntity {
 
   @Column({
     type: "varchar",
+    length: 50,
+    unique: true,
+    nullable: false,
+  })
+  username!: string;
+
+  @Column({
+    type: "varchar",
     length: 255,
     name: "password_hash",
     nullable: false,
   })
   passwordHash!: string;
-
-  @Column({ type: "varchar", length: 100 })
-  name!: string;
 
   @Column({ type: "varchar", length: 255, nullable: true })
   avatarUrl?: string;
