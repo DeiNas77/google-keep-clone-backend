@@ -1,5 +1,33 @@
 import { z } from "zod";
 
+/** Valida los requisitos de la contraseña por separado para reportar CUÁL falta. */
+function validatePasswordRequirements(
+  value: string,
+  ctx: z.RefinementCtx,
+): void {
+  const requirements = [
+    {
+      test: /[A-Z]/,
+      message: "La contraseña necesita al menos una letra mayúscula",
+    },
+    {
+      test: /\d/,
+      message: "La contraseña necesita al menos un número",
+    },
+    {
+      test: /[!@#$%^&*]/,
+      message:
+        "La contraseña necesita al menos un carácter especial (!@#$%^&*)",
+    },
+  ];
+
+  for (const { test, message } of requirements) {
+    if (!test.test(value)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message });
+    }
+  }
+}
+
 export const registerSchema = z.object({
   username: z
     .string()
@@ -14,10 +42,7 @@ export const registerSchema = z.object({
   password: z
     .string()
     .min(6, "La contraseña debe tener al menos 6 caracteres")
-    .regex(
-      /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).+$/,
-      "La contraseña debe tener una mayúscula, un número y un carácter especial",
-    ),
+    .superRefine(validatePasswordRequirements),
   avatarUrl: z.string().trim().optional(),
 });
 
@@ -44,15 +69,9 @@ export const updatePasswordSchema = z.object({
   currentPassword: z
     .string()
     .min(6, "La contraseña debe tener al menos 6 caracteres")
-    .regex(
-      /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).+$/,
-      "La contraseña debe tener una mayúscula, un número y un carácter especial",
-    ),
+    .superRefine(validatePasswordRequirements),
   newPassword: z
     .string()
     .min(6, "La contraseña debe tener al menos 6 caracteres")
-    .regex(
-      /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).+$/,
-      "La contraseña debe tener una mayúscula, un número y un carácter especial",
-    ),
+    .superRefine(validatePasswordRequirements),
 });

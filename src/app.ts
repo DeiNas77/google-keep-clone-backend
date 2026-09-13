@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import type { Request, Response } from "express";
 
 import { PORT_APP } from "./constants.js";
@@ -8,6 +9,7 @@ const app = express();
 
 app.set("port", PORT_APP || 4000);
 
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
