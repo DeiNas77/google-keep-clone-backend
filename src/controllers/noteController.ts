@@ -146,3 +146,24 @@ export const deleteNoteController = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Error interno del servidor" });
   }
 };
+
+export const deleteTrashedNotesController = async (
+  req: Request,
+  res: Response,
+) => {
+  try {
+    const userId = (req as AuthRequest).user?.id;
+
+    if (!userId) return res.status(401).json({ message: "No autorizado" });
+
+    const trashedNotes = await noteRepository.findBy({ userId, trashed: true });
+
+    if (trashedNotes.length === 0) {
+      return res.status(400).json({ message: "No se encuentra ninguna nota" });
+    }
+    await noteRepository.remove(trashedNotes);
+    return res.status(200).json({ message: "Papelera vaciada con exito" });
+  } catch (err) {
+    return res.status(500).json({ message: "Error interno del servidor" });
+  }
+};

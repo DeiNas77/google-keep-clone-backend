@@ -7,6 +7,7 @@ import { verifyTokenMiddleware } from "../middlewares/authMiddleware.js";
 import {
   createNoteController,
   deleteNoteController,
+  deleteTrashedNotesController,
   getNoteController,
   getStatsController,
   updateNoteController,
@@ -18,6 +19,11 @@ export const notesRoutes = () => {
     .route("/")
     .get([verifyTokenMiddleware], getNoteController)
     .post([verifyTokenMiddleware], createNoteController);
+
+  //Delete all trashedNotes
+  routerRoot
+    .route("/trash")
+    .delete([verifyTokenMiddleware], deleteTrashedNotesController);
 
   // OJO: /stats SIEMPRE antes de /:id — si no, Express toma "stats" como un :id
   routerRoot.route("/stats").get([verifyTokenMiddleware], getStatsController);
