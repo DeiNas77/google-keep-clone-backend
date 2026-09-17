@@ -7,6 +7,7 @@ import { MAX_LIMIT } from "../constants.js";
 import { ILike } from "typeorm";
 import type { FindOptionsWhere } from "typeorm";
 import { NoteEntity } from "../database/entities/Note.js";
+import { getUpdateMessage } from "../utils/noteMessages.js";
 
 const noteRepository = GlobalRepository.NoteRepository;
 
@@ -130,7 +131,10 @@ export const updateNoteController = async (req: Request, res: Response) => {
     });
     await noteRepository.save(noteUpdate);
 
-    return res.status(200).json({ ...noteUpdate, message: "Nota modificada" });
+    return res.status(200).json({
+      ...noteUpdate,
+      message: getUpdateMessage(findNote, noteUpdate),
+    });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return res
