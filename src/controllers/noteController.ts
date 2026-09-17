@@ -5,6 +5,8 @@ import { GlobalRepository } from "../database/repositories/globalRepositories.js
 import type { AuthRequest } from "../types/AuthRequest.js";
 import { MAX_LIMIT } from "../constants.js";
 import { ILike } from "typeorm";
+import type { FindOptionsWhere } from "typeorm";
+import { NoteEntity } from "../database/entities/Note.js";
 
 const noteRepository = GlobalRepository.NoteRepository;
 
@@ -53,12 +55,26 @@ export const getNoteController = async (req: Request, res: Response) => {
     const skip = (page - 1) * limit;
     const q = typeof req.query.q === "string" ? req.query.q : undefined;
 
-    const where = q
-      ? [
-          { userId, title: ILike(`%${q}%`) },
-          { userId, content: ILike(`%${q}%`) },
-        ]
-      : { userId };
+    const parseBooleanParam = (value: unknown): boolean | undefined => {
+      if (value === "true") return true;
+      if (value === "false") return false;
+      return undefined;
+    };
+
+    const archived = parseBooleanParam(req.query.archived);
+    const trashed = parseBooleanParam(req.query.trashed);
+
+    const baseFilter: FindOptionsWhere<NoteEntity> = { userId };
+    if (archived !== undefined) baseFilter.archived = archived;
+    if (trashed !== undefined) baseFilter.trashed = trashed;
+
+    const where: FindOptionsWhere<NoteEntity> | FindOptionsWhere<NoteEntity>[] =
+      q
+        ? [
+            { ...baseFilter, title: ILike(`%${q}%`) },
+            { ...baseFilter, content: ILike(`%${q}%`) },
+          ]
+        : baseFilter;
 
     const [notes, total] = await noteRepository.findAndCount({
       where,
