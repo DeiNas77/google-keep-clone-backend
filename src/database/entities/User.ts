@@ -1,6 +1,6 @@
 import { Entity, Column, OneToMany } from "typeorm";
 import { CoreEntity } from "./CoreEntity.js";
-import { NoteEntity } from "./Note.js";
+import type { NoteEntity } from "./Note.js";
 
 @Entity("users")
 export class UserEntity extends CoreEntity {
@@ -31,6 +31,6 @@ export class UserEntity extends CoreEntity {
   @Column({ type: "varchar", length: 255, nullable: true })
   avatarUrl?: string;
 
-  @OneToMany(() => NoteEntity, (notes) => notes.user)
+  @OneToMany("NoteEntity", "user")
   Notes!: NoteEntity[];
 }

@@ -1,7 +1,7 @@
 import { Entity, Column, ManyToOne, JoinColumn } from "typeorm";
 import { CoreEntity } from "./CoreEntity.js";
 import { Importance } from "../../types/importance.js";
-import { UserEntity } from "./User.js";
+import type { UserEntity } from "./User.js";
 
 @Entity("notes")
 export class NoteEntity extends CoreEntity {
@@ -28,7 +28,7 @@ export class NoteEntity extends CoreEntity {
   @Column({ name: "user_id", type: "uuid", nullable: false })
   userId!: string;
 
-  @ManyToOne(() => UserEntity, (user) => user.Notes)
+  @ManyToOne("UserEntity", "Notes")
   @JoinColumn({ name: "user_id" })
   user!: UserEntity;
 }

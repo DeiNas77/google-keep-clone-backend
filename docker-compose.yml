@@ -1,0 +1,34 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: google_keep_clone
+      POSTGRES_PASSWORD: GKCB_01
+      POSTGRES_DB: google_keep_clone
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  # Backend Node
+  api:
+    build: .
+    restart: always
+    ports:
+      - "4000:4000"
+    environment:
+      PORT: 4000
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: google_keep_clone
+      DB_PASSWORD: GKCB_01
+      DB_NAME: google_keep_clone
+      JWT_SECRET: jwt_gkcb
+      JWT_EXPIRES_IN: 7d
+      CLIENT_URL: http://localhost:3000
+    depends_on:
+      - db
+
+volumes:
+  pgdata:
